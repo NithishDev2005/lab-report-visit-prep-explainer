@@ -1,0 +1,86 @@
+{
+  "glucose_fasting": {
+    "test_name": "Fasting Blood Glucose",
+    "synonyms": [
+      "Glucose",
+      "Blood Sugar",
+      "Fasting Glucose",
+      "GLU"
+    ],
+    "plain_definition": "Measures the amount of sugar (glucose) circulating in your bloodstream after fasting for at least 8 hours. Glucose is your body's main energy source.",
+    "what_high_means": "May indicate difficulty processing blood sugar, influenced by recent diet, stress, illness, or insulin regulation.",
+    "what_low_means": "May indicate hypoglycemia from missed meals, certain medications, or physical exertion.",
+    "doctor_questions": [
+      "Does this reading match what you typically expect for my health profile?",
+      "Could recent fasting duration or acute stress have impacted this value?",
+      "Would you recommend checking my HbA1c to see a 3-month average?"
+    ],
+    "generic_reference_range": {
+      "min": 70.0,
+      "max": 99.0,
+      "unit": "mg/dL"
+    },
+    "critical_thresholds": {
+      "low": 50.0,
+      "high": 400.0,
+      "unit": "mg/dL"
+    },
+    "source_name": "MedlinePlus (National Library of Medicine)",
+    "source_url": "https://medlineplus.gov/lab-tests/blood-glucose-test/"
+  },
+  "potassium_serum": {
+    "test_name": "Potassium (Serum)",
+    "synonyms": [
+      "Potassium",
+      "K+",
+      "Serum Potassium"
+    ],
+    "plain_definition": "Measures the level of potassium, an essential electrolyte that helps nerves function, muscles contract, and regulates heart rhythm.",
+    "what_high_means": "Known as hyperkalemia. Elevated levels can disrupt nerve signaling and heart rhythms.",
+    "what_low_means": "Known as hypokalemia. Can cause muscle cramps, fatigue, or heart rhythm disturbances.",
+    "doctor_questions": [
+      "Could any medications or supplements I am taking affect my potassium level?",
+      "Are there dietary adjustments or repeat tests you would like me to do?",
+      "Do I need an electrocardiogram (ECG) to verify my heart rhythm?"
+    ],
+    "generic_reference_range": {
+      "min": 3.6,
+      "max": 5.2,
+      "unit": "mmol/L"
+    },
+    "critical_thresholds": {
+      "low": 2.8,
+      "high": 6.2,
+      "unit": "mmol/L"
+    },
+    "source_name": "MedlinePlus (National Library of Medicine)",
+    "source_url": "https://medlineplus.gov/lab-tests/potassium-blood-test/"
+  },
+  "creatinine_serum": {
+    "test_name": "Serum Creatinine",
+    "synonyms": [
+      "Creatinine",
+      "CREAT"
+    ],
+    "plain_definition": "Measures creatinine, a natural waste byproduct from normal muscle breakdown that healthy kidneys filter out of the blood.",
+    "what_high_means": "May suggest kidneys are filtering waste more slowly, or can be influenced by heavy exercise, dehydration, or high protein intake.",
+    "what_low_means": "Can reflect low muscle mass or reduced protein intake; generally uncommon as a clinical concern.",
+    "doctor_questions": [
+      "What does my estimated Glomerular Filtration Rate (eGFR) look like alongside this?",
+      "Was my hydration level adequate prior to the blood draw?",
+      "Are there kidney-cleared medications I should discuss with you?"
+    ],
+    "generic_reference_range": {
+      "min": 0.6,
+      "max": 1.2,
+      "unit": "mg/dL"
+    },
+    "critical_thresholds": {
+      "low": 0.2,
+      "high": 4.0,
+      "unit": "mg/dL"
+    },
+    "source_name": "MedlinePlus (National Library of Medicine)",
+    "source_url": "https://medlineplus.gov/lab-tests/creatinine-test/"
+  }
+}

@@ -1,0 +1,142 @@
+# Lab Report Visit-Prep Explainer 🩺
+### Agentic AI Hackathon 2026 — Powered by Ziro.Digital
+**Industry:** Healthcare & Wellness AI | **Team:** smart_Builders
+
+---
+
+## 📌 Executive Summary
+The **Lab Report Visit-Prep Explainer** is an agentic AI system designed to empower patients before their clinical appointments. When a patient provides a lab report, the agent generates:
+1. A **plain-language summary** explaining what each biomarker measures.
+2. An **out-of-range audit** strictly prioritizing the laboratory's specific instrument printed reference intervals.
+3. A list of tailored **discussion questions** for the attending physician.
+4. **Zero Medical Diagnoses**: Strict clinical safety guardrails prevent diagnostic claims.
+5. **Human-in-the-Loop Action**: Requires explicit human approval before persisting private visit-prep notes.
+
+---
+
+## 🏗️ System Architecture
+
+```
+                 [ Patient Lab Report (PDF / Ingestion) ]
+                                    │
+                                    ▼
+       ┌────────────────────────────────────────────────────────┐
+       │ Stage 1: Extraction & Ambiguity Guardrail              │
+       │ - Extracts values, units, lab printed intervals        │
+       │ - Evaluates OCR token confidence                       │
+       │ - [HITL Gate 1]: If ambiguous (e.g. 1.0 vs 10), pauses │
+       │   and prompts patient for explicit confirmation        │
+       └────────────────────────────┬───────────────────────────┘
+                                    │
+                                    ▼
+       ┌────────────────────────────────────────────────────────┐
+       │ Stage 2: Clinical Decision Engine & NIH Grounding      │
+       │ - Prioritizes lab's printed range over generic ranges  │
+       │ - Detects critical thresholds (e.g., Potassium 6.8)    │
+       │ - Retrieves MedlinePlus / NIH trusted citations        │
+       │ - Sanitizes text to guarantee ZERO medical diagnosis   │
+       └────────────────────────────┬───────────────────────────┘
+                                    │
+                                    ▼
+       ┌────────────────────────────────────────────────────────┐
+       │ Stage 3: Dual Verification Engine                      │
+       │ - Audits numerical copy fidelity (100% exact match)    │
+       │ - Verifies unit preservation (e.g., mg/dL, mmol/L)     │
+       │ - Validates authoritative URL source citations         │
+       └────────────────────────────┬───────────────────────────┘
+                                    │
+                                    ▼
+       ┌────────────────────────────────────────────────────────┐
+       │ Stage 4: Permitted Action with Human Approval          │
+       │ - Generates proposed Doctor Visit Preparation Note     │
+       │ - [HITL Gate 2]: Explicit human confirmation required  │
+       │ - Persists to SQLite with audit timestamp              │
+       │ - Prevents duplicate execution on re-runs              │
+       └────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🧪 Official Hackathon Test Cases (100% Pass Rate)
+
+| Test Case | Scenario | Expected Result | Agent Implementation & Evidence |
+| :--- | :--- | :--- | :--- |
+| **TC1** | **Values Copied** | Exact match to report with units | `VerificationEngine` audits extracted values/units against source document with zero drift. |
+| **TC2** | **Lab Range Differs from Generic Range** | Lab range used (prioritized) | For Fasting Glucose (104 mg/dL), generic range is 70–99 (high), but lab analyzer range is 75–110 (normal). Agent classifies as **Normal** and cites lab range priority. |
+| **TC3** | **OCR Ambiguity (1.0 vs 10)** | User asked to confirm | Agent detects low OCR confidence (`1.0*`), pauses execution in `AWAITING_USER_CONFIRMATION` state, and prompts user before resuming. |
+| **TC4** | **Critical Value Flagged** | Immediate clinician alert; no diagnosis | Serum Potassium = 6.8 mmol/L flags urgent warning: *"Please contact your clinician or seek urgent medical attention immediately."* Contains zero diagnostic claims. |
+
+---
+
+## 💻 VS Code Setup & Quickstart
+
+### 1. Open in VS Code
+Open the `lab_report_explainer` folder in Visual Studio Code.
+
+### 2. Create and Activate Virtual Environment
+Open the integrated terminal (`Ctrl + ~` or ``Cmd + ~``):
+```bash
+# macOS/Linux
+python3 -m venv venv
+source venv/bin/activate
+
+# Windows (Command Prompt / PowerShell)
+python -m venv venv
+venv\Scripts\activate
+```
+
+### 3. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Run the Official Test Suite
+Verify that all 4 official hackathon scenarios and human approval guardrails pass:
+```bash
+python tests/test_official_cases.py -v
+```
+
+### 5. Run the Automated CLI Evaluation
+Run the interactive console demo showing all states and audits:
+```bash
+python run_demo.py
+```
+
+### 6. Launch the Interactive Web App
+Launch the Streamlit web dashboard in your browser:
+```bash
+streamlit run app/ui/streamlit_app.py
+```
+
+---
+
+## 🎬 2-3 Minute Demo Video Script (Judging Rubric Aligned)
+
+* **0:00 – 0:30 (Problem Fit & Usefulness - 20 pts)**:
+  * "Hello judges! Team smart_Builders presents the Lab Report Visit-Prep Explainer. Patients often receive complex lab reports, panic over generic web searches, or enter doctor visits unprepared. Our agent bridges this gap by creating plain-language explanations and doctor discussion questions—with zero diagnosis and strict clinical guardrails."
+* **0:30 – 1:15 (Agentic Capability & Official Test Cases - 25 pts)**:
+  * *Demo TC1*: Show report upload and exact value/unit verification audit.
+  * *Demo TC2*: Show Fasting Glucose at 104 mg/dL. Point out how the agent uses the lab's instrument range (75-110 mg/dL) rather than generic textbook averages.
+  * *Demo TC3*: Show an ambiguous scan (`1.0*`). The agent halts and prompts: *"Did your report say 1.0 or 10 mg/dL?"* Click 1.0 to show the agent intelligently resumes.
+* **1:15 – 1:50 (Technical Implementation & Critical Safety - 20 pts)**:
+  * *Demo TC4*: Show Potassium at 6.8 mmol/L. Demonstrate the immediate clinical escalation banner advising urgent clinician contact, highlighting that no diagnostic labels were generated.
+  * Show the dual verification table showing 100% fidelity on values, units, and NIH MedlinePlus citations.
+* **1:50 – 2:20 (User Experience & Human-in-the-Loop Permitted Action - 10 pts)**:
+  * Review the proposed Visit-Prep Note and generated doctor questions.
+  * Click **Approve and Save**. Show the database persistence confirmation and demonstrate that clicking again prevents duplicate writes.
+* **2:20 – 2:30 (Conclusion & Next Steps - 10 pts)**:
+  * "By combining trusted NIH grounding, lab-specific calibration, and explicit human approval, we deliver a safe, compliant, and transformative clinical prep agent. Thank you!"
+
+---
+
+## 📊 Presentation Deck Outline (10 Slides)
+1. **Title**: Lab Report Visit-Prep Explainer (Team smart_Builders, Agentic AI Hackathon 2026).
+2. **The Problem**: Health literacy gap, diagnostic hallucinations in LLMs, and patient anxiety.
+3. **The Solution**: An autonomous clinical prep agent with multi-stage verification.
+4. **Agent Architecture**: Perception $\rightarrow$ Ambiguity Check $\rightarrow$ Clinical Rules $\rightarrow$ Grounding $\rightarrow$ Human Approval.
+5. **Safety Guardrails**: Why lab instrument ranges matter & the zero-diagnosis enforcement engine.
+6. **Official Test Cases**: Verifiable proof for TC1, TC2, TC3, and TC4.
+7. **Human-in-the-Loop Design**: Safeguarding clinical actions and patient data autonomy.
+8. **Tech Stack**: Python, LangGraph/State Machine, Streamlit, PyMuPDF, SQLite, MedlinePlus/NIH.
+9. **Future Roadmap**: EHR integration (FHIR/HL7), multi-language medical translation, audio visit summary.
+10. **Team & Conclusion**: smart_Builders — Empowering informed clinical conversations.

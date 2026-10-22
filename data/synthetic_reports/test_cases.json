@@ -1,0 +1,133 @@
+{
+  "TC1_values_copied": {
+    "title": "TC1: Exact Values & Units Copy Verification",
+    "description": "Validates exact values, units, and printed ranges copied with zero drift.",
+    "patient": {
+      "name": "Synthetic Patient Alpha",
+      "id": "SYN-1001",
+      "collection_date": "2026-10-20"
+    },
+    "tests": [
+      {
+        "test_key": "glucose_fasting",
+        "test_name": "Fasting Blood Glucose",
+        "result": 92.0,
+        "unit": "mg/dL",
+        "printed_range": "70.0 - 99.0",
+        "flag": "Normal",
+        "ocr_confidence": 0.99
+      },
+      {
+        "test_key": "potassium_serum",
+        "test_name": "Potassium (Serum)",
+        "result": 4.2,
+        "unit": "mmol/L",
+        "printed_range": "3.5 - 5.0",
+        "flag": "Normal",
+        "ocr_confidence": 0.98
+      },
+      {
+        "test_key": "creatinine_serum",
+        "test_name": "Serum Creatinine",
+        "result": 0.95,
+        "unit": "mg/dL",
+        "printed_range": "0.60 - 1.20",
+        "flag": "Normal",
+        "ocr_confidence": 0.99
+      }
+    ]
+  },
+  "TC2_lab_range_override": {
+    "title": "TC2: Lab Range Differs from Generic Range",
+    "description": "Tests that lab's printed range takes precedence over generic textbook range.",
+    "patient": {
+      "name": "Synthetic Patient Beta",
+      "id": "SYN-1002",
+      "collection_date": "2026-10-21"
+    },
+    "tests": [
+      {
+        "test_key": "glucose_fasting",
+        "test_name": "Fasting Blood Glucose",
+        "result": 104.0,
+        "unit": "mg/dL",
+        "printed_range": "75.0 - 110.0",
+        "flag": "Normal",
+        "ocr_confidence": 0.98
+      },
+      {
+        "test_key": "creatinine_serum",
+        "test_name": "Serum Creatinine",
+        "result": 1.1,
+        "unit": "mg/dL",
+        "printed_range": "0.50 - 1.15",
+        "flag": "Normal",
+        "ocr_confidence": 0.97
+      }
+    ]
+  },
+  "TC3_ambiguous_ocr": {
+    "title": "TC3: Ambiguous OCR Reading (1.0 vs 10)",
+    "description": "Simulates ambiguous reading where agent prompts user to confirm.",
+    "patient": {
+      "name": "Synthetic Patient Gamma",
+      "id": "SYN-1003",
+      "collection_date": "2026-10-22"
+    },
+    "tests": [
+      {
+        "test_key": "creatinine_serum",
+        "test_name": "Serum Creatinine",
+        "raw_ocr_string": "1.0*",
+        "candidate_options": [
+          1.0,
+          10.0
+        ],
+        "result": null,
+        "unit": "mg/dL",
+        "printed_range": "0.60 - 1.20",
+        "flag": "UNCERTAIN",
+        "ocr_confidence": 0.45,
+        "is_ambiguous": true
+      },
+      {
+        "test_key": "potassium_serum",
+        "test_name": "Potassium (Serum)",
+        "result": 4.1,
+        "unit": "mmol/L",
+        "printed_range": "3.5 - 5.0",
+        "flag": "Normal",
+        "ocr_confidence": 0.99
+      }
+    ]
+  },
+  "TC4_critical_value": {
+    "title": "TC4: Critical Life-Threatening Value Flagged",
+    "description": "Biomarker breaches critical limit, triggering urgent clinician advisory with no diagnosis.",
+    "patient": {
+      "name": "Synthetic Patient Delta",
+      "id": "SYN-1004",
+      "collection_date": "2026-10-22"
+    },
+    "tests": [
+      {
+        "test_key": "potassium_serum",
+        "test_name": "Potassium (Serum)",
+        "result": 6.8,
+        "unit": "mmol/L",
+        "printed_range": "3.5 - 5.0",
+        "flag": "CRITICAL_HIGH",
+        "ocr_confidence": 0.99
+      },
+      {
+        "test_key": "glucose_fasting",
+        "test_name": "Fasting Blood Glucose",
+        "result": 95.0,
+        "unit": "mg/dL",
+        "printed_range": "70.0 - 99.0",
+        "flag": "Normal",
+        "ocr_confidence": 0.98
+      }
+    ]
+  }
+}
