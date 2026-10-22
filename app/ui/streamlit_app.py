@@ -1,5 +1,7 @@
 import streamlit as st
-import json, os, sys
+import json
+import os
+import sys
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if PROJECT_ROOT not in sys.path:
@@ -11,7 +13,11 @@ from app.core.database import init_db
 init_db()
 agent = LabReportAgent()
 
-st.set_page_config(page_title="Lab Report Visit-Prep Explainer", page_icon="??", layout="wide")
+st.set_page_config(
+    page_title="Lab Report Visit-Prep Explainer",
+    page_icon="stethoscope",
+    layout="wide"
+)
 
 st.markdown("""
 <style>
@@ -24,28 +30,33 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="main-header">?? Lab Report Visit-Prep Explainer</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-header">Agentic Healthcare Assistant • Ziro.Digital Hackathon 2026 • Team smart_Builders</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-header">Lab Report Visit-Prep Explainer</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-header">Agentic Healthcare Assistant | Ziro.Digital Hackathon 2026 | Team smart_Builders</div>', unsafe_allow_html=True)
 
-with open(os.path.join(PROJECT_ROOT, "data", "synthetic_reports", "test_cases.json")) as f:
+test_cases_file = os.path.join(PROJECT_ROOT, "data", "synthetic_reports", "test_cases.json")
+with open(test_cases_file, "r", encoding="utf-8") as f:
     test_cases = json.load(f)
 
-st.sidebar.header("?? Agent Controls")
-scenario_choice = st.sidebar.selectbox("Select Test Case Scenario", list(test_cases.keys()), format_func=lambda k: test_cases[k]["title"])
+st.sidebar.header("Agent Controls")
+scenario_choice = st.sidebar.selectbox(
+    "Select Test Case Scenario",
+    list(test_cases.keys()),
+    format_func=lambda k: test_cases[k]["title"]
+)
 active_case = test_cases[scenario_choice]
-st.sidebar.info(f"**Target Objective:**\n{active_case['description']}")
+st.sidebar.info(f"Target Objective:\n{active_case['description']}")
 
 st.sidebar.markdown("---")
 consent = st.sidebar.checkbox("Explicit Patient Consent Granted", value=True)
 if not consent:
-    st.warning("?? **Consent Required:** User consent must be granted in the sidebar to process laboratory biomarker panels.")
+    st.warning("Consent Required: User consent must be granted in the sidebar to process laboratory biomarker panels.")
     st.stop()
 
 col1, col2 = st.columns([3, 1])
 with col1:
-    st.write(f"**Selected Panel:** {active_case['patient']['name']} | Collection: {active_case['patient']['collection_date']}")
+    st.write(f"Selected Panel: `{active_case['patient']['name']}` | Collection: `{active_case['patient']['collection_date']}`")
 with col2:
-    run_btn = st.button("?? Analyze Lab Report", type="primary", use_container_width=True)
+    run_btn = st.button("Analyze Lab Report", type="primary", use_container_width=True)
 
 if run_btn or "result" not in st.session_state or st.session_state.get("current_scenario") != scenario_choice:
     st.session_state["result"] = agent.process_report(active_case, consent_given=True)
@@ -55,20 +66,20 @@ res = st.session_state.get("result", {})
 session_id = res.get("session_id")
 
 if res.get("status") == "AWAITING_USER_CONFIRMATION":
-    st.error("?? **Human-in-the-Loop Intercept: OCR Token Ambiguity Detected**")
+    st.error("Human-in-the-Loop Intercept: OCR Token Ambiguity Detected")
     amb = res["ambiguities"][0]
-    st.markdown(f"The document reader detected visual smudging on **{amb['test_name']}** (Raw token: {amb['raw_string']}).")
+    st.markdown(f"The document reader detected visual smudging on **{amb['test_name']}** (Raw token: `{amb['raw_string']}`).")
     confirmed_val = st.radio("Please select the exact printed value on your physical paper report:", amb["candidate_options"], format_func=lambda x: f"{x} mg/dL (Printed on report)", horizontal=True)
-    if st.button("Confirm Reading & Resume Agent", type="primary"):
+    if st.button("Confirm Reading and Resume Agent", type="primary"):
         st.session_state["result"] = agent.confirm_ambiguity(session_id, {amb["test_key"]: confirmed_val})
         st.rerun()
     st.stop()
 
 if res.get("critical_alerts"):
     for alert in res["critical_alerts"]:
-        st.error(f"?? **HIGH-PRIORITY CLINICAL ESCALATION: {alert['test_name']} ({alert['value']})**\n{alert['advisory']}\n*(Safety Rule: Zero medical diagnoses are generated).*")
+        st.error(f"HIGH-PRIORITY CLINICAL ESCALATION: {alert['test_name']} ({alert['value']})\n\n{alert['advisory']}\n\n(Safety Rule: Zero medical diagnoses are generated).")
 
-tab1, tab2, tab3, tab4 = st.tabs(["?? Biomarker Breakdown", "??? Dual-Verification Audit", "?? Questions for Your Doctor", "?? Exportable Visit Note"])
+tab1, tab2, tab3, tab4 = st.tabs(["Biomarker Breakdown", "Dual-Verification Audit", "Questions for Your Doctor", "Exportable Visit Note"])
 
 with tab1:
     st.markdown("### Verified Biomarker Cards")
@@ -94,38 +105,38 @@ with tab1:
 
 with tab2:
     v = res.get("verification_report", {})
-    st.markdown("### Programmatic Copy & Grounding Audit")
+    st.markdown("### Programmatic Copy and Grounding Audit")
     audit_data = []
     for a in v.get("audits", []):
         audit_data.append({
             "Biomarker": a["test_name"],
             "Input Value": a["input_value"],
             "Parsed Value": a["extracted_value"],
-            "Value Check": "? PASS" if a["value_check"] == "PASS" else a["value_check"],
-            "Unit Preserved": f"? {a['extracted_unit']}" if a["unit_check"] == "PASS" else "? FAIL",
-            "NIH Citation Verified": "? PASS" if a["source_cited"] else "? FAIL",
-            "Audit Verdict": "? VERIFIED" if a["overall_status"] == "PASS" else a["overall_status"]
+            "Value Check": "PASS" if a["value_check"] == "PASS" else a["value_check"],
+            "Unit Preserved": f"{a['extracted_unit']}" if a["unit_check"] == "PASS" else "FAIL",
+            "NIH Citation Verified": "PASS" if a["source_cited"] else "FAIL",
+            "Audit Verdict": "VERIFIED" if a["overall_status"] == "PASS" else a["overall_status"]
         })
     st.dataframe(audit_data, use_container_width=True)
 
 with tab3:
     st.markdown("### Personalized Doctor Consultation Questions")
     for q in res.get("doctor_questions", []):
-        st.markdown(f"- **{q}**")
+        st.markdown(f"- {q}")
 
 with tab4:
     note = res.get("proposed_note", {})
     st.markdown("### Proposed Doctor Visit Preparation Note")
     st.markdown(note.get("summary_markdown", ""))
     st.markdown("---")
-    st.markdown("#### ?? Permitted Action: Human Approval Gate")
+    st.markdown("#### Permitted Action: Human Approval Gate")
     col_a, col_b = st.columns([2, 1])
     with col_a:
-        if st.button("? Approve & Save Visit-Prep Note", type="primary", use_container_width=True):
+        if st.button("Approve and Save Visit-Prep Note", type="primary", use_container_width=True):
             app_res = agent.approve_and_save_note(note["note_id"])
             if app_res["status"] == "SUCCESS_APPROVED_AND_SAVED":
-                st.success(f"?? **Note Stored!** Note ID {note['note_id']} securely recorded in SQLite at {app_res['approved_at']}.")
+                st.success(f"Note Stored! Note ID `{note['note_id']}` securely recorded in SQLite at `{app_res['approved_at']}`.")
             elif app_res["status"] == "ALREADY_APPROVED":
-                st.info(f"?? Note {note['note_id']} was already approved and stored.")
+                st.info(f"Note `{note['note_id']}` was already approved and stored.")
     with col_b:
-        st.download_button(label="?? Download Prep Note (.md)", data=note.get("summary_markdown", ""), file_name=f"visit_prep_note_{session_id}.md", mime="text/markdown", use_container_width=True)
+        st.download_button(label="Download Prep Note (.md)", data=note.get("summary_markdown", ""), file_name=f"visit_prep_note_{session_id}.md", mime="text/markdown", use_container_width=True)
