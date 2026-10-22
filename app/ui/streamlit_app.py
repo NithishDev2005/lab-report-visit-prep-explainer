@@ -330,3 +330,80 @@ with tab1:
         
         st.markdown(f"""
         <div class="{card_class}">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 1.15rem; font-weight: 700; color: #0F172A;">{t['test_name']}</span>
+                <div>{lab_badge} &nbsp; {badge_html}</div>
+            </div>
+            <div style="display: flex; align-items: baseline; gap: 8px; margin: 12px 0 6px 0;">
+                <span style="font-size: 2rem; font-weight: 800; color: #0F172A;">{t['result']}</span>
+                <span style="font-size: 1rem; font-weight: 600; color: #64748B;">{t['unit']}</span>
+                <span style="font-size: 0.9rem; color: #94A3B8; margin-left: 12px;">(Laboratory Analyzer Interval: <b>{t['printed_range']}</b>)</span>
+            </div>
+            <div class="range-bar-bg"><div class="range-bar-fill" style="width: 60%;"></div></div>
+            <p style="margin: 10px 0 4px 0; font-size: 0.9rem; color: #334155; line-height: 1.5;">
+                <b>What this test measures:</b> {t['plain_definition']}
+            </p>
+            <div style="font-size: 0.8rem; color: #64748B; margin-top: 6px;">
+                Clinical Citation: <a href="{t['source_url']}" target="_blank" style="color: #0284C7; font-weight: 600; text-decoration: none;">{t['source_name']} ↗</a>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+# TAB 2: AUDIT
+with tab2:
+    st.markdown("#### Programmatic Verification Grid")
+    st.caption("Verifies that every extracted character, unit, and reference interval matches the raw input with zero drift.")
+    
+    v = res.get("verification_report", {})
+    audit_data = []
+    for a in v.get("audits", []):
+        audit_data.append({
+            "Biomarker Name": a["test_name"],
+            "Report Raw Value": a["input_value"],
+            "Agent Parsed Value": a["extracted_value"],
+            "Numerical Match": "✓ EXACT PASS" if a["value_check"] == "PASS" else a["value_check"],
+            "Unit Preserved": f"✓ {a['extracted_unit']}" if a["unit_check"] == "PASS" else "FAIL",
+            "NIH Citation Grounded": "✓ VERIFIED" if a["source_cited"] else "FAIL",
+            "Verification Verdict": "✅ COMPLIANT" if a["overall_status"] == "PASS" else a["overall_status"]
+        })
+    st.dataframe(audit_data, use_container_width=True)
+
+# TAB 3: QUESTIONS
+with tab3:
+    st.markdown("#### Tailored Physician Discussion Questions")
+    st.caption("Review and take these specific questions into your clinical consultation:")
+    
+    for i, q in enumerate(res.get("doctor_questions", []), start=1):
+        st.markdown(f"""
+        <div class="q-card">
+            <span style="background: #0284C7; color: white; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; flex-shrink: 0;">{i}</span>
+            <span style="font-size: 0.95rem; color: #1E293B; font-weight: 500;">{q}</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+# TAB 4: NOTE
+with tab4:
+    note = res.get("proposed_note", {})
+    st.markdown("#### Generated Doctor Visit Preparation Document")
+    st.text_area("Visit Note Preview (Markdown):", value=note.get("summary_markdown", ""), height=260)
+    
+    st.markdown("---")
+    st.markdown("### 🔒 Permitted Action: Human Approval Gate")
+    st.caption("The agent requires your explicit sign-off before committing this private note to your local medical records database.")
+    
+    action_cols = st.columns([2, 1])
+    with action_cols[0]:
+        if st.button("✅ Approve & Commit to Database", type="primary", use_container_width=True):
+            app_res = agent.approve_and_save_note(note["note_id"])
+            if app_res["status"] == "SUCCESS_APPROVED_AND_SAVED":
+                st.success(f"🎉 **Visit-Prep Note Successfully Committed!** Note ID `{note['note_id']}` securely recorded in SQLite at `{app_res['approved_at']}`.")
+            elif app_res["status"] == "ALREADY_APPROVED":
+                st.info(f"ℹ️ Note `{note['note_id']}` was already approved and stored. Duplicate execution prevented.")
+    with action_cols[1]:
+        st.download_button(
+            label="📥 Export Note (.md)",
+            data=note.get("summary_markdown", ""),
+            file_name=f"visit_prep_note_{session_id}.md",
+            mime="text/markdown",
+            use_container_width=True
+        )
